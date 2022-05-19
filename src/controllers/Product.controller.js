@@ -5,7 +5,7 @@ const { product } = require("../models/product.module");
 
 const productRouter = express.Router();
 
-productRouter.post("", authenticate, authorize(["admin", "seller"]), async (req, res) => {
+productRouter.post("", authenticate, authorize(["admin"]), async (req, res) => {
 	try {
 
 		const _id = req.user._id;
@@ -13,6 +13,8 @@ productRouter.post("", authenticate, authorize(["admin", "seller"]), async (req,
 			title: req.body.title,
 			price: req.body.price,
 			user_id: _id,
+			image: req.body.image,
+			description: req.body.description,
 		});
 
 		return res.send(productData).status(200);
@@ -22,7 +24,7 @@ productRouter.post("", authenticate, authorize(["admin", "seller"]), async (req,
 });
 
 
-productRouter.patch("/:id", authenticate, authorize(["admin", "seller"]) , async (req, res) => {
+productRouter.patch("/:id", authenticate, authorize(["admin"]) , async (req, res) => {
 	try {
 		const productData = await product.findByIdAndUpdate(
 			req.params.id,
@@ -46,6 +48,17 @@ productRouter.get("", async (req, res) => {
 		return res.send({ e }).status(500);
 	}
 });
+productRouter.get("/:id", async (req, res) => {
+	try {
+		const productData = await product.findOne({_id : req.params.id})
+
+		return res.send(productData).status(200);
+	} catch (e) {
+		return res.send({ e }).status(500);
+	}
+});
+
+
 
 
 

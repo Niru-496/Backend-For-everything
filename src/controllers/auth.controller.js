@@ -1,14 +1,16 @@
+const express = require('express');
 const { user } = require("../models/user.module");
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 
-
-
 const newToken = (data) => {
 	// console.log(process.env);
 	return jwt.sign({ data }, process.env.KEY);
 };
+
+
+
 
 const register = async (req, res) => {
 	try {
@@ -22,7 +24,7 @@ const register = async (req, res) => {
 		data = await user.create(req.body);
 
 		const token = newToken(data);
-		res.send({ data , token});
+		res.send({ data, token }).status(200);
 	} catch (error) {
 		res.send(error.message).status(500);
 	}
@@ -45,11 +47,14 @@ const login = async (req, res) => {
 
 		const token = newToken(data);
 
-		res.send({ data, token });
+		res.send({ data, token }).status(200);
 	} catch (error) {
 		res.send(error).status(500);
 	}
 };
+
+
+
 
 
 

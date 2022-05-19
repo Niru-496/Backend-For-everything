@@ -3,9 +3,11 @@ const { default: mongoose } = require("mongoose");
 
 const userSchema = new mongoose.Schema(
 	{
+		fullName: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
-		role:[{type:String}]
+		role: [{ type: String, required: false, default: "customer" }],
+		isAdmin: { type: Boolean, required: false, default:false },
 	},
 	{
 		versionKey: false,
@@ -13,21 +15,19 @@ const userSchema = new mongoose.Schema(
 	}
 );
 
+userSchema.pre("save", function (next) {
+	if (!this.isModified("password")) return next();
 
-userSchema.pre("save", function (next){
-    if(!this.isModified("password")) return next()
+	var hash = bcrypt.hashSync(this.password, 6);
 
-    var hash = bcrypt.hashSync(this.password, 6);
+	this.password = hash;
 
-    this.password = hash
-
-    return next()
-})
-
+	return next();
+});
 
 userSchema.methods.checkPassword = function (password) {
 	return bcrypt.compareSync(password, this.password);
 };
-const user = mongoose.model("user",userSchema)
+const user = mongoose.model("user", userSchema);
 
-module.exports ={user}
+module.exports = { user };
