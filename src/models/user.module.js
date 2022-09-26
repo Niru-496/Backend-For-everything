@@ -3,11 +3,9 @@ const { default: mongoose } = require("mongoose");
 
 const userSchema = new mongoose.Schema(
 	{
-		fullName: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
-		role: [{ type: String, required: false, default: "customer" }],
-		isAdmin: { type: Boolean, required: false, default:false },
+		isActive: { type: Boolean, required: false, default: true },
 	},
 	{
 		versionKey: false,

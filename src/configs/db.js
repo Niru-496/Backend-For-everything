@@ -1,10 +1,12 @@
 const { default: mongoose } = require("mongoose");
-
-const connect = () => {
-	return mongoose.connect(
-		"mongodb+srv://niru143:niru143@practice.dmokj.mongodb.net/MyuserDB?retryWrites=true&w=majority"
-	);
+require("dotenv").config();
+const connect = async () => {
+	try {
+		const conn = mongoose.connect(process.env.DB);
+		return conn;
+	} catch (error) {
+		console.log(error.message);
+	}
 };
 
 module.exports = { connect };
-

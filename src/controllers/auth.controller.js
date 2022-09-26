@@ -1,62 +1,84 @@
-const express = require('express');
+const express = require("express");
 const { user } = require("../models/user.module");
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 
-const newToken = (data) => {
-	// console.log(process.env);
-	return jwt.sign({ data }, process.env.KEY);
+const newToken = (data, key, time) => {
+	return new Promise((resolve, reject) => {
+		jwt.sign({ data }, key, { expiresIn: time }, function (err, token) {
+			if (err) {
+				reject(err);
+			}
+			resolve(token);
+		});
+	});
 };
 
-
-
-
-const register = async (req, res) => {
+const signup = async (req, res) => {
 	try {
-		let data = await user.findOne({ email: req.body.email }).lean().exec();
-
+		const data = await user
+			.findOne({ email: req.body.email })
+			.lean()
+			.exec();
 		if (data)
-			return res
-				.status(400)
-				.send({ message: "User is already registerd with this mail" });
+			return res.status(410).send({
+				message: "User is already registerd with this mail",
+				status: 410,
+			});
 
-		data = await user.create(req.body);
-
-		const token = newToken(data);
-		res.send({ data, token }).status(200);
+		await user.create(req.body);
+		return res
+			.status(201)
+			.send({ message: `signup completed sucessfully`, status: 201 });
 	} catch (error) {
-		res.send(error.message).status(500);
+		return res
+			.status(500)
+			.send({ message: `${error.message}`, status: 500 });
 	}
 };
 
-const login = async (req, res) => {
+const signin = async (req, res) => {
 	try {
-		let data = await user.findOne({ email: req.body.email });
+		const { email, password } = req.body;
 
-		if (!data)
+		if (email && password) {
+			let data = await user
+				.findOne({ email: req.body.email })
+				.lean()
+				.exec();
+			if (!data)
+				return res.status(400).send({
+					message: ` message: "username or password is incorrect"`,
+					status: 400,
+				});
+			const check = data.checkPassword(password);
+			if (!check)
+				return res.status(400).send({
+					message: "username or password is incorrect",
+					status: 400,
+				});
+			data.password = null;
+			const token = newToken(data, process.env.KEY, "1d");
+
+			return res.status(200).send({
+				message: `User signin sucessfully`,
+				status: 200,
+				token,
+			});
+		} else {
 			return res
 				.status(400)
-				.send({ message: "username or password is incorrect" });
-
-		const check = data.checkPassword(req.body.password);
-		if (!check)
-			return res
-				.status(400)
-				.send({ message: "username or password is incorrect" });
-
-		const token = newToken(data);
-
-		res.send({ data, token }).status(200);
+				.send({
+					message: `email or password are missing`,
+					status: 400,
+				});
+		}
 	} catch (error) {
-		res.send(error).status(500);
+		return res
+			.status(500)
+			.send({ message: `${error.message}`, status: 500 });
 	}
 };
 
-
-
-
-
-
-
-module.exports = { register, login };
+module.exports = { signup, signin, newToken };
