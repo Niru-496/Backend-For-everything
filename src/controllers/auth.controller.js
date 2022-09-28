@@ -1,18 +1,11 @@
 const express = require("express");
-const { user } = require("../models/user.module");
+const { user, checkPassword } = require("../models/user.module");
 const jwt = require("jsonwebtoken");
 
 require("dotenv").config();
 
 const newToken = (data, key, time) => {
-	return new Promise((resolve, reject) => {
-		jwt.sign({ data }, key, { expiresIn: time }, function (err, token) {
-			if (err) {
-				reject(err);
-			}
-			resolve(token);
-		});
-	});
+	return jwt.sign({ data }, key, { expiresIn: time });
 };
 
 const signup = async (req, res) => {
@@ -52,7 +45,7 @@ const signin = async (req, res) => {
 					message: ` message: "username or password is incorrect"`,
 					status: 400,
 				});
-			const check = data.checkPassword(password);
+			const check = checkPassword(req.body.password, data.password);
 			if (!check)
 				return res.status(400).send({
 					message: "username or password is incorrect",
@@ -60,19 +53,16 @@ const signin = async (req, res) => {
 				});
 			data.password = null;
 			const token = newToken(data, process.env.KEY, "1d");
-
 			return res.status(200).send({
 				message: `User signin sucessfully`,
 				status: 200,
 				token,
 			});
 		} else {
-			return res
-				.status(400)
-				.send({
-					message: `email or password are missing`,
-					status: 400,
-				});
+			return res.status(400).send({
+				message: `email or password are missing`,
+				status: 400,
+			});
 		}
 	} catch (error) {
 		return res

@@ -23,9 +23,10 @@ userSchema.pre("save", function (next) {
 	return next();
 });
 
-userSchema.methods.checkPassword = function (password) {
-	return bcrypt.compareSync(password, this.password);
+const checkPassword = function (mewPassword, OldPassword) {
+	// const hash = bcrypt.hashSync(mewPassword, 6);
+	return bcrypt.compareSync(mewPassword, OldPassword);
 };
 const user = mongoose.model("user", userSchema);
 
-module.exports = { user };
+module.exports = { user, checkPassword };
