@@ -4,8 +4,8 @@ const { connect } = require("./configs/db");
 require("dotenv").config();
 const { router } = require("./routers/user.routes");
 
-const { passport } = require("./configs/g-auth");
-const session = require("express-session");
+// const { passport } = require("./configs/g-auth");
+// const session = require("express-session");
 
 const port = process.env.PORT || 8000;
 
@@ -22,38 +22,38 @@ app.use(
 
 app.get("/", (req, res) => res.send("Hello World!"));
 
-app.use("/", router);
-app.use(
-	session({
-		resave: false,
-		saveUninitialized: true,
-		secret: process.env.GOOGLE_CLIENT_SECRET,
-	})
-);
+app.use("/api", router);
+// app.use(
+// 	session({
+// 		resave: false,
+// 		saveUninitialized: true,
+// 		secret: process.env.GOOGLE_CLIENT_SECRET,
+// 	})
+// );
 
-passport.serializeUser(function (user, done) {
-	done(null, user);
-});
+// passport.serializeUser(function (user, done) {
+// 	done(null, user);
+// });
 
-passport.deserializeUser(function (user, done) {
-	done(null, user);
-});
+// passport.deserializeUser(function (user, done) {
+// 	done(null, user);
+// });
 
-app.get(
-	"/auth/google",
-	passport.authenticate("google", { scope: ["email", "profile"] })
-);
+// app.get(
+// 	"/auth/google",
+// 	passport.authenticate("google", { scope: ["email", "profile"] })
+// );
 
-app.get(
-	"/auth/google/callback",
-	passport.authenticate("google", {
-		failureRedirect: "/auth/google/failure",
-	}),
-	(req, res) => {
-		const { user } = req;
-		return res.send({ user });
-	}
-);
+// app.get(
+// 	"/auth/google/callback",
+// 	passport.authenticate("google", {
+// 		failureRedirect: "/auth/google/failure",
+// 	}),
+// 	(req, res) => {
+// 		const { user } = req;
+// 		return res.send({ user });
+// 	}
+// );
 
 app.listen(port, async () => {
 	try {

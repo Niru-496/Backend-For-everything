@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const newToken = (data, key, time) => {
-	return jwt.sign({ data }, key, { expiresIn: time });
+	return jwt.sign({ data },  key, { expiresIn: time });
 };
 
 const signup = async (req, res) => {
@@ -20,10 +20,14 @@ const signup = async (req, res) => {
 				status: 410,
 			});
 
-		await user.create(req.body);
-		return res
-			.status(201)
-			.send({ message: `signup completed sucessfully`, status: 201 });
+		const NewUser = await user.create(req.body);
+		const token = newToken(NewUser, "Niranjan_Key", "1d");
+		return res.status(200).send({
+			message: `User signup sucessfully`,
+			status: 200,
+			token,
+		});
+
 	} catch (error) {
 		return res
 			.status(500)
@@ -52,7 +56,7 @@ const signin = async (req, res) => {
 					status: 400,
 				});
 			data.password = null;
-			const token = newToken(data, process.env.KEY, "1d");
+			const token = newToken(data, "Niranjan_Key", "1d");
 			return res.status(200).send({
 				message: `User signin sucessfully`,
 				status: 200,
